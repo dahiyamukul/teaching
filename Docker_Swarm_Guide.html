@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker Swarm Setup on AWS EC2 Instances</title>
+</head>
+<body>
+
+<h1>Step 1: Set up AWS EC2 Instances</h1>
+<p><strong>Sign in to AWS Console:</strong> Log in to your AWS Management Console.</p>
+<p><strong>Launch EC2 Instances:</strong></p>
+<ul>
+  <li>Go to the EC2 dashboard.</li>
+  <li>Click on "Launch Instance" to create a new EC2 instance.</li>
+  <li>Choose an Ubuntu Server AMI.</li>
+  <li>Select an instance type (e.g., t2.micro).</li>
+  <li>Configure instance details (leave default if unsure).</li>
+  <li>Add storage (default is fine).</li>
+  <li>Add tags (optional).</li>
+  <li>Configure security group:
+    <ul>
+      <li>Create a new security group.</li>
+      <li>Add inbound rules to allow SSH (port 22) and Docker Swarm ports (e.g., 2377, 7946, 4789).</li>
+    </ul>
+  </li>
+  <li>Review and launch the instance.</li>
+</ul>
+<p><strong>Repeat for Multiple Instances:</strong> Launch additional EC2 instances to simulate a Docker Swarm cluster.</p>
+
+<h1>Step 2: Connect to EC2 Instances</h1>
+<p><strong>Get Public IP Addresses:</strong> Once instances are running, note down their public IP addresses.</p>
+<p><strong>SSH into Instances:</strong></p>
+<ul>
+  <li>Open a terminal on your local machine.</li>
+  <li>Use SSH to connect to each EC2 instance:</li>
+</ul>
+<pre><code>ssh -i your-key.pem ubuntu@public-ip</code></pre>
+<p>Replace <code>your-key.pem</code> with your SSH key file and <code>public-ip</code> with the public IP address of the instance.</p>
+
+<h1>Step 3: Install Docker on EC2 Instances</h1>
+<p><strong>Update Package Index:</strong> Run the following command to update the package index:</p>
+<pre><code>sudo apt update</code></pre>
+<p><strong>Install Docker:</strong> Install Docker Engine on each EC2 instance:</p>
+<pre><code>sudo apt install docker.io -y</code></pre>
+<p><strong>Start Docker Service:</strong> Start the Docker service:</p>
+<pre><code>sudo systemctl start docker</code></pre>
+<p><strong>Enable Docker to Start on Boot:</strong> Enable Docker to start on boot:</p>
+<pre><code>sudo systemctl enable docker</code></pre>
+
+<h1>Step 4: Initialize Docker Swarm</h1>
+<p><strong>Choose Manager Node:</strong> Select one of the EC2 instances to be the manager node.</p>
+<p><strong>Initialize Swarm:</strong> SSH into the chosen manager node. Run the following command to initialize Docker Swarm:</p>
+<pre><code>sudo docker swarm init --advertise-addr &lt;manager-public-ip&gt;</code></pre>
+<p>Replace <code>&lt;manager-public-ip&gt;</code> with the public IP address of the manager node.</p>
+<p><strong>Join Worker Nodes:</strong> After initialization, note down the command provided to join worker nodes. SSH into each worker node. Run the join command provided by the manager node.</p>
+
+<h1>Step 5: Deploy Services to Docker Swarm</h1>
+<p><strong>Deploy a Service:</strong> SSH into the manager node. Deploy a sample service using the following command:</p>
+<pre><code>sudo docker service create --name web --replicas 3 -p 80:80 nginx</code></pre>
+<p>This command creates a service named <code>web</code> with 3 replicas using the NGINX image.</p>
+<p><strong>Check Service Status:</strong> Check the status of the deployed service:</p>
+<pre><code>sudo docker service ls</code></pre>
+<p>This command lists all the services running in the Docker Swarm.</p>
+<p><strong>Scale the Service:</strong> Scale up the number of replicas of the service:</p>
+<pre><code>sudo docker service scale web=5</code></pre>
+<p>This command scales the <code>web</code> service to 5 replicas.</p>
+
+<h1>Step 6: Experiment with Docker Swarm</h1>
+<p><strong>Update Service:</strong> Update the service with a new image or configuration:</p>
+<pre><code>sudo docker service update --image new-image:tag web</code></pre>
+<p><strong>Inspect Service:</strong> Inspect detailed information about the service:</p>
+<pre><code>sudo docker service inspect --pretty web</code></pre>
+<p><strong>Remove Service:</strong> Remove the service from the Docker Swarm:</p>
+<pre><code>sudo docker service rm web</code></pre>
+<p><strong>Leave Swarm:</strong> To remove a node from the Swarm, SSH into the node and run:</p>
+<pre><code>sudo docker swarm leave</code></pre>
+<p>This removes the node from the Swarm.</p>
+
+<p>By following these steps and executing the provided commands, your students will get hands-on experience with Docker Swarm on Ubuntu EC2 instances. Make sure to explain each step and command thoroughly to ensure understanding.</p>
+
+</body>
+</html>
